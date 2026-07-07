@@ -32,7 +32,10 @@ jobs:
         id: vars
         run: |
           BRANCH="${{ github.event.ref }}"
-          FUNZIONALITA="${BRANCH#*/}"
+
+          PREFIX="${BRANCH%%/*}"
+          SUFFIX="${BRANCH#*/}"
+          FUNZIONALITA="${PREFIX}_${SUFFIX}"
           # sanitizzazione minima: niente ".." o slash residui pericolosi
           FUNZIONALITA=$(echo "$FUNZIONALITA" | sed 's#\.\.##g')
           if [ -z "$FUNZIONALITA" ]; then
@@ -40,6 +43,7 @@ jobs:
             exit 1
           fi
           echo "folder=$FUNZIONALITA" >> "$GITHUB_OUTPUT"
+
 
       # 3. Checkout del repo template_solution (branch main) in una cartella temporanea
       #    Richiede un PAT cross-repo salvato come secret (GITHUB_TOKEN non ha accesso ad altri repo)
