@@ -68,7 +68,7 @@ jobs:
           FOLDER="${{ steps.vars.outputs.folder }}"
           mkdir -p "$FOLDER"
           # copia tutto il contenuto di template_solution, escluso .git
-          rsync -a --exclude='.git' _template_solution/ "$FOLDER"/
+          rsync -a --exclude='.git' _template_solution/solution "$FOLDER"/
 
       # 6. Per ogni file copiato, se esiste un file con lo stesso nome in snow,
       #    ne sostituisce il contenuto con quello preso da snow
