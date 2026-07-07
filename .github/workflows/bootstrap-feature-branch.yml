@@ -1,0 +1,100 @@
+name: Bootstrap Solution Folder
+
+# Si attiva alla creazione di un nuovo branch (o tag) nel repo dominio_abc
+on:
+  create
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    # Esegue solo se:
+    # - è stato creato un branch (non un tag)
+    # - il nome contiene uno slash, cioè rispetta il pattern id-iniziativa/funzionalita
+    if: >
+      github.event.ref_type == 'branch' &&
+      contains(github.event.ref, '/') &&
+      github.event.ref != 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout del nuovo branch appena creato in dominio_abc
+      - name: Checkout nuovo branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      # 2. Estrae il nome della funzionalità dal nome branch (parte dopo il primo "/")
+      - name: Estrai nome funzionalita
+        id: vars
+        run: |
+          BRANCH="${{ github.event.ref }}"
+          FUNZIONALITA="${BRANCH#*/}"
+          # sanitizzazione minima: niente ".." o slash residui pericolosi
+          FUNZIONALITA=$(echo "$FUNZIONALITA" | sed 's#\.\.##g')
+          if [ -z "$FUNZIONALITA" ]; then
+            echo "Nome funzionalita non valido, interrompo." >&2
+            exit 1
+          fi
+          echo "folder=$FUNZIONALITA" >> "$GITHUB_OUTPUT"
+
+      # 3. Checkout del repo template_solution (branch main) in una cartella temporanea
+      #    Richiede un PAT cross-repo salvato come secret (GITHUB_TOKEN non ha accesso ad altri repo)
+      - name: Checkout template_solution
+        uses: actions/checkout@v4
+        with:
+          repository: ORGANIZZAZIONE/template_solution
+          ref: main
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          path: _template_solution
+
+      # 4. Checkout del repo snow (branch main) in un'altra cartella temporanea
+      - name: Checkout snow
+        uses: actions/checkout@v4
+        with:
+          repository: ORGANIZZAZIONE/snow
+          ref: main
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          path: _snow
+
+      # 5. Crea la cartella della funzionalita sotto la root e ci copia i template
+      - name: Copia i template nella nuova cartella
+        run: |
+          FOLDER="${{ steps.vars.outputs.folder }}"
+          mkdir -p "$FOLDER"
+          # copia tutto il contenuto di template_solution, escluso .git
+          rsync -a --exclude='.git' _template_solution/ "$FOLDER"/
+
+      # 6. Per ogni file copiato, se esiste un file con lo stesso nome in snow,
+      #    ne sostituisce il contenuto con quello preso da snow
+      - name: Popola i file con i requisiti da snow
+        run: |
+          FOLDER="${{ steps.vars.outputs.folder }}"
+          find "$FOLDER" -type f | while read -r f; do
+            fname=$(basename "$f")
+            match=$(find _snow -type f -name "$fname" ! -path '*/.git/*' | head -n1)
+            if [ -n "$match" ]; then
+              echo "Popolo $f con contenuto da $match"
+              cp "$match" "$f"
+            fi
+          done
+
+      # 7. Pulizia delle cartelle temporanee, non devono finire nel commit
+      - name: Rimuovi cartelle temporanee
+        run: rm -rf _template_solution _snow
+
+      # 8. Commit e push sul branch appena creato
+      - name: Commit e push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica da committare."
+          else
+            git commit -m "Bootstrap automatico cartella soluzione: ${{ steps.vars.outputs.folder }}"
+            git push origin HEAD:${{ github.event.ref }}
+          fi

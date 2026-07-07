@@ -1,0 +1,48 @@
+name: Convert Markdown to PDF
+
+on:
+#  push:
+#    tags:
+#      - '*'
+  release:
+    types: [published]  # o created
+    
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install quarto 
+        run: |
+          wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.10.14/quarto-1.10.14-linux-amd64.deb
+          sudo dpkg -i quarto-1.10.14-linux-amd64.deb
+          quarto install tinytex
+    
+      - name: Generate PDF
+        run: |
+          NAME=$(echo "${{ github.event.release.tag_name }}" | cut -d'-' -f2-)
+          TAG=$(echo "${{ github.event.release.tag_name }}" | cut -d'-' -f1)
+          echo "NAME=$NAME" >> "$GITHUB_ENV"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "$NAME"
+          #cd $NAME
+         
+          #ls -l
+          #pwd
+          #cat -A _quarto.yml  | sed -n '1,6p'
+
+          quarto render $NAME --to pdf --output quarto_${{ github.event.release.tag_name }}.pdf
+      
+      - name: Debug - verifica GITHUB_ENV
+        run: cat "$GITHUB_ENV"
+
+      - name: Upload PDF as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.NAME }}/quarto_${{ github.event.release.tag_name }}.pdf
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
