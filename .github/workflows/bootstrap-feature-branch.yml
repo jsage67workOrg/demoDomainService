@@ -77,7 +77,7 @@ jobs:
           FOLDER="${{ steps.vars.outputs.folder }}"
           find "$FOLDER" -type f | while read -r f; do
             fname=$(basename "$f")
-            match=$(find _snow -type f -name "$fname" ! -path '*/.git/*' | head -n1)
+            match=$(find _snow -type f -name "$fname/snow-data" ! -path '*/.git/*' | head -n1)
             if [ -n "$match" ]; then
               echo "Popolo $f con contenuto da $match"
               cp "$match" "$f"
