@@ -1,2 +1,2 @@
-# demoDomainService
-dominio di un servizio
+# demoSolutionTemplates
+file template di dominio e solution
