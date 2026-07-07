@@ -46,18 +46,20 @@ jobs:
       - name: Checkout template_solution
         uses: actions/checkout@v4
         with:
-          repository: ORGANIZZAZIONE/template_solution
+          repository: demoSolutionTemplates
           ref: main
-          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          #token: ${{ secrets.CROSS_REPO_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: _template_solution
 
       # 4. Checkout del repo snow (branch main) in un'altra cartella temporanea
       - name: Checkout snow
         uses: actions/checkout@v4
         with:
-          repository: ORGANIZZAZIONE/snow
+          repository: demoSnow
           ref: main
-          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          #token: ${{ secrets.CROSS_REPO_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: _snow
 
       # 5. Crea la cartella della funzionalita sotto la root e ci copia i template
