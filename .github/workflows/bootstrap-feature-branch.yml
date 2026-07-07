@@ -33,9 +33,19 @@ jobs:
         run: |
           BRANCH="${{ github.event.ref }}"
 
-          PREFIX="${BRANCH%%/*}"
-          SUFFIX="${BRANCH#*/}"
-          FUNZIONALITA="${PREFIX}_${SUFFIX}"
+          #PREFIX="${BRANCH%%/*}"
+          #SUFFIX="${BRANCH#*/}"
+          #FUNZIONALITA="${IDINIZIATIVA}_${NOMEPROGETTYO}"
+
+          SOTTOGRUPPO=$(echo "$BRANCH" | cut -d'/' -f1)
+          IDINIZIATIVA=$(echo "$BRANCH" | cut -d'/' -f2)
+          NOMEPROGETTO=$(echo "$BRANCH" | cut -d'/' -f3)
+
+          FUNZIONALITA="${IDINIZIATIVA}_${NOMEPROGETTO}"
+          if [ -z "$NOMEPROGETTO" ]; then
+            FUNZIONALITA="${IDINIZIATIVA}"
+          fi
+
           # sanitizzazione minima: niente ".." o slash residui pericolosi
           FUNZIONALITA=$(echo "$FUNZIONALITA" | sed 's#\.\.##g')
           if [ -z "$FUNZIONALITA" ]; then
@@ -43,6 +53,7 @@ jobs:
             exit 1
           fi
           echo "folder=$FUNZIONALITA" >> "$GITHUB_OUTPUT"
+          echo "sottogrp=$SOTTOGRUPPO" >> "$GITHUB_OUTPUT"
 
 
       # 3. Checkout del repo template_solution (branch main) in una cartella temporanea
@@ -70,16 +81,20 @@ jobs:
       - name: Copia i template nella nuova cartella
         run: |
           FOLDER="${{ steps.vars.outputs.folder }}"
-          mkdir -p "$FOLDER"
+          SOTTOGRP="${{ steps.vars.outputs.sottogrp }}"
+          INIZIATIVA="$SOTTOGRP"/"$FOLDER"
+          mkdir -p "$INIZIATIVA"
           # copia tutto il contenuto di template_solution, escluso .git
-          rsync -a --exclude='.git' _template_solution/solution/* "$FOLDER"/
+          rsync -a --exclude='.git' _template_solution/solution/* "$INIZIATIVA"/
 
       # 6. Per ogni file copiato, se esiste un file con lo stesso nome in snow,
       #    ne sostituisce il contenuto con quello preso da snow
       - name: Popola i file con i requisiti da snow
         run: |
           FOLDER="${{ steps.vars.outputs.folder }}"
-          find "$FOLDER" -type f | while read -r f; do
+          SOTTOGRP="${{ steps.vars.outputs.sottogrp }}"
+          INIZIATIVA="$SOTTOGRP"/"$FOLDER"
+          find "$INIZIATIVA" -type f | while read -r f; do
             fname=$(basename "$f")
             match=$(find _snow/snow-data -type f -name "$fname" ! -path '*/.git/*' | head -n1)
             if [ -n "$match" ]; then
@@ -87,6 +102,7 @@ jobs:
               cp "$match" "$f"
             fi
           done
+          cp _snow/snow-data/snow*.md "$INIZIATIVA"
 
       # 7. Pulizia delle cartelle temporanee, non devono finire nel commit
       - name: Rimuovi cartelle temporanee
