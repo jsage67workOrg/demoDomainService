@@ -6,7 +6,7 @@
 
 ## Information System Architecture
 
-<!-- ISTRUZIONE: Descrivere l'insieme degli applicativi/moduli coinvolti e le loro principali interazioni a livello di flussi dati. Questa sezione copre il "chi parla con chi"; le logiche di dettaglio (come, con quale sequenza, con quali condizioni) vanno nella Specifica di Integrazione. -->
+<!-- ISTRUZIONE: Descrivere l'insieme degli applicativi/moduli coinvolti e le loro principali interazioni a livello di flussi dati. Questa sezione copre il "chi parla con chi"; le logiche di dettaglio (come, con quale sequenza, con quali condizioni) vanno nella Specifica di Integrazione. qui la mia modifica -->
 
 _[Inserire qui il diagramma ISA]_
 
