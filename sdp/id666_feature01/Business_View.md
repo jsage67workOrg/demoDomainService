@@ -7,7 +7,7 @@
 ## Panoramica della Soluzione
 
 > [!NOTE]
-> Breve descrizione della soluzione proposta, del contesto e delle motivazioni che guidano l'iniziativa, degli obiettivi principali e dei benefici attesi. Fornire indicazioni relative al target a cui è rivolta ed eventuali canali di erogazione. -->
+> Breve descrizione della soluzione proposta, del contesto e delle motivazioni che guidano l'iniziativa, degli obiettivi principali e dei benefici attesi. Fornire indicazioni relative al target a cui è rivolta ed eventuali canali di erogazione. Qui ho modificato -->
 
 _[Panoramica — da compilare]_
 
