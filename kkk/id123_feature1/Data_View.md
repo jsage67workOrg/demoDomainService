@@ -6,7 +6,7 @@
 > Sezione modulare: compilare solo le sotto-sezioni pertinenti alla soluzione. Ogni sotto-sezione è facoltativa e indipendente.
 
 <!-- ISTRUZIONE: Questa view descrive la relazione tra la solution e i Data Product coinvolti — quali vengono consumati, creati o modificati e quali impatti architetturali ne derivano. Non duplicare qui informazioni che vivono nel catalogo dati aziendale: elenco completo degli attributi, definizione dei campi, regole di qualità dettagliate, lineage completo. -->
-
+<!-- MODIFICA -->
 ---
 
 ## Data Product consumati
